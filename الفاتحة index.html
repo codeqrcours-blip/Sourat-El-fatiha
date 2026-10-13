@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>سورة الفاتحة - تعلّم واختبر حفظك</title>
+
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: Tahoma, Arial, sans-serif;
+    background: linear-gradient(135deg, #fffaf0, #ffedd5);
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    padding: 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+#surah {
+    width: 100%;
+    max-width: 900px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.surah-title {
+    text-align: center;
+    margin: 8px auto 26px;
+    padding: 18px 30px;
+    max-width: 700px;
+    color: #7c2d12;
+    font-family: "Amiri", "Traditional Arabic", serif;
+    font-size: clamp(34px, 8vw, 64px);
+    font-weight: bold;
+    line-height: 1.5;
+    border: 3px double #d97706;
+    border-radius: 45px 12px 45px 12px;
+    background: linear-gradient(135deg, #fffaf0, #ffedd5);
+    box-shadow: 0 6px 16px #92400e20;
+}
+
+.surah-title::before,
+.surah-title::after {
+    content: "✦";
+    color: #d97706;
+    font-size: 24px;
+    margin: 0 12px;
+}
+
+.ayah {
+    background: #ffffff;
+    border: 2px solid #fed7aa;
+    border-radius: 18px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 3px 10px #7c2d1210;
+    transition: 0.25s;
+    flex-wrap: wrap;
+}
+
+.words {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+}
+
+.word {
+    border: 1px solid #fed7aa;
+    background: #fff7ed;
+    color: #7c2d12;
+    border-radius: 12px;
+    padding: 8px 10px;
+    font-family: "Traditional Arabic", "Amiri", Tahoma, serif;
+    font-size: clamp(22px, 5.5vw, 38px);
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform .15s, background .2s, color .2s;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    line-height: 1.4;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.word:active { transform: scale(.94); }
+
+.word.active {
+    background: #f97316;
+    color: white;
+    border-color: #ea580c;
+    box-shadow: 0 0 0 3px #fdba7455;
+}
+
+.word.recited {
+    background: #16a34a;
+    color: white;
+    border-color: #15803d;
+    box-shadow: 0 0 0 3px #86efac55;
+}
+
+.word.wrong {
+    background: #dc2626;
+    color: white;
+    border-color: #b91c1c;
+    animation: shake .4s;
+}
+
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.listen {
+    flex-shrink: 0;
+    width: 45px;
+    height: 45px;
+    border: none;
+    border-radius: 13px;
+    background: #f97316;
+    color: white;
+    font-size: 21px;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.listen:active { transform: scale(.92); }
+
+.ayah.active-ayah {
+    border-color: #f97316;
+    background: #fff7ed;
+}
+
+.ayah.reciting {
+    border-color: #16a34a;
+    background: #f0fdf4;
+    box-shadow: 0 0 0 3px #86efac55;
+}
+
+/* ============================================================
+   الأزرار - محسّنة لضمان الظهور على جميع الأجهزة
+   ============================================================ */
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 20px auto 8px;
+    flex-wrap: wrap;
+    max-width: 900px;
+    padding: 0 8px;
+    width: 100%;
+}
+
+.control {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform .1s, background .2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+    min-height: 46px;
+    flex: 0 1 auto;
+    -webkit-appearance: none;
+    appearance: none;
+    touch-action: manipulation;
+    line-height: 1;
+}
+
+.control:active { transform: scale(.95); }
+
+#play-all { background: #c2410c; color: #fff; }
+#test-mode { background: #16a34a; color: #fff; }
+#test-mode.active { background: #dc2626; color: #fff; }
+#stop { background: #e5e7eb; color: #374151; }
+
+#status {
+    text-align: center;
+    color: #9a3412;
+    font-size: 14px;
+    min-height: 22px;
+    margin-top: 8px;
+    font-weight: bold;
+    padding: 0 12px;
+}
+
+/* لوحة نتيجة الاختبار */
+.test-panel {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 16px;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+.test-panel.show { display: flex; }
+
+.test-box {
+    background: #fff;
+    border-radius: 22px;
+    padding: 24px 20px;
+    max-width: 480px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    text-align: center;
+    box-shadow: 0 20px 60px #0004;
+    animation: popIn .3s ease;
+}
+
+@keyframes popIn {
+    from { transform: scale(.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.test-box h2 {
+    margin: 0 0 12px;
+    color: #7c2d12;
+    font-size: 24px;
+}
+
+.test-score {
+    font-size: 56px;
+    font-weight: bold;
+    margin: 8px 0;
+    color: #16a34a;
+}
+
+.test-score.low { color: #dc2626; }
+.test-score.mid { color: #f59e0b; }
+
+.test-detail {
+    color: #57534e;
+    font-size: 15px;
+    line-height: 1.8;
+    margin: 12px 0 20px;
+    text-align: right;
+    direction: rtl;
+}
+
+.test-detail .ok { color: #16a34a; font-weight: bold; }
+.test-detail .no { color: #dc2626; font-weight: bold; }
+
+.test-close {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 14px;
+    background: #c2410c;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* مؤشر الاستماع */
+.mic-status {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #dc2626;
+    margin-right: 6px;
+    animation: pulse 1.2s infinite;
+    vertical-align: middle;
+}
+
+@keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .4; transform: scale(1.3); }
+}
+
+/* تحسين اللمس على الأجهزة اللوحية */
+@media (hover: none) and (pointer: coarse) {
+    .word { padding: 10px 12px; }
+}
+
+/* شاشات صغيرة */
+@media (max-width: 480px) {
+    body { padding: 8px; }
+    .ayah { padding: 12px; gap: 8px; }
+    .words { gap: 6px; }
+    .word { padding: 7px; border-radius: 10px; }
+    .listen { width: 40px; height: 40px; font-size: 18px; }
+    .control { padding: 10px 12px; font-size: 13px; min-height: 42px; gap: 4px; }
+    .surah-title { padding: 12px 16px; margin-bottom: 18px; }
+    .surah-title::before,
+    .surah-title::after { font-size: 16px; margin: 0 6px; }
+    .test-box { padding: 20px 16px; }
+    .test-score { font-size: 44px; }
+}
+
+@media (max-width: 400px) {
+    .control {
+        font-size: 12px;
+        padding: 9px 10px;
+        gap: 3px;
+        min-height: 40px;
+        border-radius: 12px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<h1 class="surah-title">سورة الفاتحة</h1>
+
+<div id="surah"></div>
+
+<div class="controls">
+    <button class="control" id="play-all" type="button">
+        <span>🔊</span> السورة كاملة
+    </button>
+    <button class="control" id="test-mode" type="button">
+        <span>🎤</span> اختبر حفظك
+    </button>
+    <button class="control" id="stop" type="button">
+        <span>⏹</span> إيقاف
+    </button>
+</div>
+
+<div id="status" role="status" aria-live="polite"></div>
+
+<audio id="player" preload="auto" playsinline webkit-playsinline></audio>
+
+<div class="test-panel" id="test-panel">
+    <div class="test-box">
+        <h2 id="test-title">نتيجة التسميع</h2>
+        <div class="test-score" id="test-score">—</div>
+        <div class="test-detail" id="test-detail"></div>
+        <button class="test-close" type="button" onclick="closeTestPanel()">حسناً</button>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+   بيانات السورة مع التوقيتات (بالمللي ثانية)
+   ============================================================ */
+const ayahs = [
+    {
+        words: ["بِسْمِ", "اللَّهِ", "الرَّحْمَٰنِ", "الرَّحِيمِ"],
+        timings: [0, 900, 1750, 2900],
+        duration: 4200,
+        audio: "https://everyayah.com/data/Alafasy_128kbps/001001.mp3"
+    },
+    {
+        words: ["الْحَمْدُ", "لِلَّهِ", "رَبِّ", "الْعَالَمِينَ"],
+        timings: [0, 950, 1750, 2400],
+        duration: 4600,
+        audio: "https://everyayah.com/data/Alafasy_128kbps/001002.mp3"
+    },
+    {
+        words: ["الرَّحْمَٰنِ", "الرَّحِيمِ"],
+        timings: [0, 1500],
+        duration: 3200,
+        audio: "https://everyayah.com/data/Alafasy_128kbps/001003.mp3"
+    },
+    {
+        words: ["مَالِكِ", "يَوْمِ", "الدِّينِ"],
+        timings: [0, 950, 1700],
+        duration: 3200,
+        audio: "https://everyayah.com/data/Alafasy_128kbps/001004.mp3"
+    },
+    {
+        words: ["إِيَّاكَ", "نَعْبُدُ", "وَإِيَّاكَ", "نَسْتَعِينُ"],
+        timings: [0, 1100, 1900, 3200],
+        duration: 5200,
+        audio: "https://everyayah.com/data/Alafasy_128kbps/001005.mp3"
+    },
+    {
+        words: ["اهْدِنَا", "الصِّرَاطَ", "الْمُسْتَقِيمَ"],
+        timings: [0, 1100, 2300],
+        duration: 4400,
+        audio: "https://everyayah.com/data/Alafasy_128kbps/001006.mp3"
+    },
+    {
+        words: ["صِرَاطَ", "الَّذِينَ", "أَنْعَمْتَ", "عَلَيْهِمْ",
+                "غَيْرِ", "الْمَغْضُوبِ", "عَلَيْهِمْ",
+                "وَلَا", "الضَّالِّينَ"],
+        timings: [0, 900, 1800, 2800, 3900, 4800, 6300, 7500, 8300],
+        duration: 11000,
+        audio: "https://everyayah.com/data/Alafasy_128kbps/001007.mp3"
+    }
+];
+
+/* ============================================================
+   عناصر الصفحة
+   ============================================================ */
+const container = document.getElementById("surah");
+const player = document.getElementById("player");
+const statusEl = document.getElementById("status");
+const testModeBtn = document.getElementById("test-mode");
+const testPanel = document.getElementById("test-panel");
+
+let operation = 0;
+let arabicVoice = null;
+let highlightTimer = null;
+let testModeActive = false;
+let recognition = null;
+
+/* ============================================================
+   دعم iOS: فك حظر الصوت عند أول لمسة
+   ============================================================ */
+let audioUnlocked = false;
+function unlockAudioOnce() {
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    player.play().then(() => {
+        player.pause();
+        player.currentTime = 0;
+    }).catch(() => {});
+    if ("speechSynthesis" in window) {
+        const u = new SpeechSynthesisUtterance(" ");
+        u.volume = 0;
+        speechSynthesis.speak(u);
+    }
+}
+document.addEventListener("touchstart", unlockAudioOnce, { once: true, passive: true });
+document.addEventListener("click", unlockAudioOnce, { once: true });
+
+/* ============================================================
+   تحميل الأصوات العربية
+   ============================================================ */
+function loadVoices() {
+    if (!("speechSynthesis" in window)) return;
+    const voices = speechSynthesis.getVoices();
+    arabicVoice =
+        voices.find(v => v.lang && v.lang.toLowerCase().startsWith("ar")) || null;
+}
+
+if ("speechSynthesis" in window) {
+    loadVoices();
+    speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+/* ============================================================
+   بناء واجهة السورة
+   ============================================================ */
+ayahs.forEach((ayah, ai) => {
+    const card = document.createElement("section");
+    card.className = "ayah";
+    card.id = `ayah-${ai}`;
+
+    const words = document.createElement("div");
+    words.className = "words";
+
+    ayah.words.forEach((word, wi) => {
+        const btn = document.createElement("button");
+        btn.className = "word";
+        btn.textContent = word;
+        btn.type = "button";
+        btn.dataset.index = wi;
+        btn.setAttribute("aria-label", "استمع إلى " + word);
+
+        btn.addEventListener("click", () => playWord(word, ai, wi));
+        words.appendChild(btn);
+    });
+
+    const listen = document.createElement("button");
+    listen.className = "listen";
+    listen.type = "button";
+    listen.textContent = "🔊";
+    listen.title = "استمع إلى الآية كاملة";
+    listen.setAttribute("aria-label", "استمع إلى الآية كاملة");
+    listen.addEventListener("click", () => playAyah(ai));
+
+    card.append(words, listen);
+    container.appendChild(card);
+});
+
+/* ============================================================
+   أدوات التظليل
+   ============================================================ */
+function clearHighlights() {
+    document.querySelectorAll(".ayah").forEach(el => {
+        el.classList.remove("active-ayah", "reciting");
+    });
+    document.querySelectorAll(".word").forEach(el => {
+        el.classList.remove("active", "recited", "wrong");
+    });
+    if (highlightTimer) {
+        clearTimeout(highlightTimer);
+        highlightTimer = null;
+    }
+}
+
+/* ============================================================
+   إيقاف الصوت
+   ============================================================ */
+function stopCurrentSound() {
+    try {
+        player.pause();
+        player.currentTime = 0;
+    } catch(e) {}
+    if ("speechSynthesis" in window) {
+        speechSynthesis.cancel();
+    }
+    if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+    }
+}
+
+function preparePlayback() {
+    operation++;
+    stopCurrentSound();
+    clearHighlights();
+    return operation;
+}
+
+/* ============================================================
+   نطق كلمة منفردة
+   ============================================================ */
+function playWord(word, ai, wi) {
+    preparePlayback();
+
+    const card = document.getElementById(`ayah-${ai}`);
+    const button = card.querySelectorAll(".word")[wi];
+
+    card.classList.add("active-ayah");
+    button.classList.add("active");
+
+    if (!("speechSynthesis" in window)) {
+        statusEl.textContent = "النطق المنفرد غير مدعوم في هذا الجهاز.";
+        return;
+    }
+
+    loadVoices();
+
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.lang = arabicVoice ? arabicVoice.lang : "ar-SA";
+    utterance.rate = 0.7;
+    utterance.pitch = 1;
+
+    if (arabicVoice) utterance.voice = arabicVoice;
+
+    utterance.onend = () => {
+        button.classList.remove("active");
+        card.classList.remove("active-ayah");
+    };
+
+    utterance.onerror = () => {
+        statusEl.textContent = "تعذر نطق الكلمة. حاولي مرة أخرى.";
+    };
+
+    statusEl.textContent = word;
+    speechSynthesis.speak(utterance);
+}
+
+/* ============================================================
+   تشغيل آية مع التظليل المتزامن
+   ============================================================ */
+function playAyah(ai) {
+    const token = preparePlayback();
+    const card = document.getElementById(`ayah-${ai}`);
+    const btns = card.querySelectorAll(".word");
+
+    card.classList.add("active-ayah");
+    statusEl.textContent = "جارٍ تشغيل الآية...";
+
+    player.src = ayahs[ai].audio;
+    player.currentTime = 0;
+
+    scheduleHighlight(ai, token);
+
+    player.onended = () => {
+        if (token !== operation) return;
+        card.classList.remove("active-ayah");
+        btns.forEach(b => b.classList.remove("active"));
+        statusEl.textContent = "";
+    };
+
+    player.onerror = () => {
+        if (token === operation) {
+            statusEl.textContent = "تعذر تحميل الصوت. تحققي من الإنترنت.";
+        }
+    };
+
+    const playPromise = player.play();
+    if (playPromise && playPromise.catch) {
+        playPromise.catch(() => {
+            if (token === operation) {
+                statusEl.textContent = "تعذر تشغيل الصوت. حاولي مرة أخرى.";
+            }
+        });
+    }
+}
+
+function scheduleHighlight(ai, token) {
+    if (highlightTimer) clearTimeout(highlightTimer);
+
+    const ayah = ayahs[ai];
+    const card = document.getElementById(`ayah-${ai}`);
+    if (!card) return;
+
+    function tick() {
+        if (token !== operation) return;
+        const t = player.currentTime * 1000;
+
+        let idx = -1;
+        for (let i = 0; i < ayah.timings.length; i++) {
+            if (t >= ayah.timings[i]) idx = i;
+            else break;
+        }
+
+        if (idx >= 0) {
+            const btns = card.querySelectorAll(".word");
+            btns.forEach((b, i) => {
+                b.classList.toggle("active", i === idx);
+            });
+        }
+
+        if (!player.paused && !player.ended) {
+            highlightTimer = setTimeout(tick, 60);
+        }
+    }
+
+    tick();
+}
+
+/* ============================================================
+   تشغيل السورة كاملة
+   ============================================================ */
+function playFullSurah() {
+    const token = preparePlayback();
+    let index = 0;
+
+    function nextAyah() {
+        if (token !== operation) return;
+
+        if (index >= ayahs.length) {
+            clearHighlights();
+            statusEl.textContent = "انتهى الاستماع.";
+            return;
+        }
+
+        clearHighlights();
+
+        const card = document.getElementById(`ayah-${index}`);
+        card.classList.add("active-ayah");
+        player.src = ayahs[index].audio;
+        player.currentTime = 0;
+
+        scheduleHighlight(index, token);
+
+        player.onended = () => {
+            if (token !== operation) return;
+            index++;
+            nextAyah();
+        };
+
+        player.onerror = () => {
+            if (token === operation) {
+                statusEl.textContent = "تعذر تحميل الصوت. تحققي من الإنترنت.";
+            }
+        };
+
+        statusEl.textContent = "";
+        const p = player.play();
+        if (p && p.catch) {
+            p.catch(() => {
+                if (token === operation) {
+                    statusEl.textContent = "تعذر تشغيل الصوت.";
+                }
+            });
+        }
+    }
+
+    nextAyah();
+}
+
+/* ============================================================
+   إيقاف
+   ============================================================ */
+function stopAudio() {
+    operation++;
+    stopCurrentSound();
+    clearHighlights();
+    statusEl.textContent = "";
+    if (testModeActive) exitTestMode();
+}
+
+/* ============================================================
+   وضع الاختبار - التعرف على الكلام
+   ============================================================ */
+function getSpeechRecognition() {
+    return window.SpeechRecognition || window.webkitSpeechRecognition;
+}
+
+function enterTestMode() {
+    testModeActive = true;
+    testModeBtn.classList.add("active");
+    testModeBtn.innerHTML = "<span>⏹</span> إنهاء الاختبار";
+    statusEl.innerHTML = '🎤 اقرأ الآية بصوت واضح<span class="mic-status"></span>';
+    clearHighlights();
+
+    startRecognitionForAyah(0);
+}
+
+function exitTestMode() {
+    testModeActive = false;
+    testModeBtn.classList.remove("active");
+    testModeBtn.innerHTML = "<span>🎤</span> اختبر حفظك";
+    statusEl.textContent = "";
+    clearHighlights();
+    if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+        recognition = null;
+    }
+}
+
+function startRecognitionForAyah(ayahIndex) {
+    if (!testModeActive) return;
+    if (ayahIndex >= ayahs.length) {
+        statusEl.textContent = "✅ انتهى الاختبار.";
+        exitTestMode();
+        return;
+    }
+
+    clearHighlights();
+    const card = document.getElementById(`ayah-${ayahIndex}`);
+    card.classList.add("reciting");
+
+    const targetWords = ayahs[ayahIndex].words;
+
+    const normalize = (s) => s
+        .replace(/[\u064B-\u0652\u0670\u0640]/g, "")
+        .replace(/[أإآٱ]/g, "ا")
+        .replace(/ى/g, "ي")
+        .replace(/ؤ/g, "و")
+        .replace(/ئ/g, "ي")
+        .replace(/ة/g, "ه")
+        .replace(/[^\u0600-\u06FF\s]/g, "")
+        .trim();
+
+    const normalizedTarget = targetWords.map(normalize);
+
+    recognition = new (getSpeechRecognition())();
+    recognition.lang = "ar-SA";
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 3;
+
+    let finalTranscript = "";
+    let matchedCount = 0;
+    const matchedFlags = new Array(targetWords.length).fill(false);
+    const buttons = card.querySelectorAll(".word");
+
+    recognition.onresult = (event) => {
+        let interim = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const res = event.results[i];
+            if (res.isFinal) {
+                finalTranscript += " " + res[0].transcript;
+            } else {
+                interim += " " + res[0].transcript;
+            }
+        }
+
+        const currentText = normalize(finalTranscript + " " + interim);
+        const recitedWords = currentText.split(/\s+/).filter(Boolean);
+
+        let recIdx = 0;
+        for (let i = 0; i < targetWords.length; i++) {
+            if (matchedFlags[i]) continue;
+            const target = normalizedTarget[i];
+            let found = false;
+            for (let j = recIdx; j < recitedWords.length; j++) {
+                const spoken = recitedWords[j];
+                if (spoken === target || levenshtein(spoken, target) <= 1) {
+                    found = true;
+                    recIdx = j + 1;
+                    break;
+                }
+            }
+            if (found) {
+                matchedFlags[i] = true;
+                buttons[i].classList.add("recited");
+                buttons[i].classList.remove("wrong");
+                matchedCount++;
+            }
+        }
+    };
+
+    recognition.onerror = (e) => {
+        if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+            statusEl.textContent = "⚠️ يجب السماح بالوصول إلى الميكروفون.";
+            exitTestMode();
+        }
+    };
+
+    recognition.onend = () => {
+        if (!testModeActive) return;
+
+        for (let i = 0; i < targetWords.length; i++) {
+            if (!matchedFlags[i]) {
+                buttons[i].classList.add("wrong");
+            }
+        }
+
+        const total = targetWords.length;
+        const score = Math.round((matchedCount / total) * 100);
+
+        showTestResult(ayahIndex, score, matchedCount, total, targetWords, matchedFlags);
+
+        setTimeout(() => {
+            if (testModeActive) {
+                startRecognitionForAyah(ayahIndex + 1);
+            }
+        }, 2500);
+    };
+
+    try {
+        recognition.start();
+    } catch (e) {
+        statusEl.textContent = "تعذر بدء الميكروفون. حاولي مرة أخرى.";
+    }
+}
+
+/* ============================================================
+   حساب المسافة بين نصين
+   ============================================================ */
+function levenshtein(a, b) {
+    if (!a.length) return b.length;
+    if (!b.length) return a.length;
+    const m = [];
+    for (let i = 0; i <= b.length; i++) m[i] = [i];
+    for (let j = 0; j <= a.length; j++) m[0][j] = j;
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            m[i][j] = b[i-1] === a[j-1]
+                ? m[i-1][j-1]
+                : Math.min(m[i-1][j-1]+1, m[i][j-1]+1, m[i-1][j]+1);
+        }
+    }
+    return m[b.length][a.length];
+}
+
+/* ============================================================
+   عرض نافذة النتيجة
+   ============================================================ */
+function showTestResult(ayahIndex, score, matched, total, words, flags) {
+    const scoreEl = document.getElementById("test-score");
+    const detailEl = document.getElementById("test-detail");
+    const titleEl = document.getElementById("test-title");
+
+    titleEl.textContent = `نتيجة الآية ${ayahIndex + 1}`;
+    scoreEl.textContent = score + "%";
+    scoreEl.classList.remove("low", "mid");
+    if (score < 50) scoreEl.classList.add("low");
+    else if (score < 80) scoreEl.classList.add("mid");
+
+    let html = `<div>الكلمات الصحيحة: <span class="ok">${matched}</span> من ${total}</div>`;
+    html += `<div style="margin-top:8px;">التفصيل:</div>`;
+    words.forEach((w, i) => {
+        const ok = flags[i];
+        html += `<div style="margin:4px 0;">
+            ${ok ? "✅" : "❌"}
+            <span class="${ok ? 'ok' : 'no'}">${w}</span>
+        </div>`;
+    });
+    detailEl.innerHTML = html;
+    testPanel.classList.add("show");
+}
+
+function closeTestPanel() {
+    testPanel.classList.remove("show");
+}
+
+testPanel.addEventListener("click", (e) => {
+    if (e.target === testPanel) closeTestPanel();
+});
+
+/* ============================================================
+   ربط الأزرار (مع حماية من الأخطاء)
+   ============================================================ */
+(function bindButtons() {
+    const playAllBtn = document.getElementById("play-all");
+    const stopBtn = document.getElementById("stop");
+    const testBtn = document.getElementById("test-mode");
+
+    if (playAllBtn) {
+        playAllBtn.addEventListener("click", playFullSurah);
+    }
+    if (stopBtn) {
+        stopBtn.addEventListener("click", stopAudio);
+    }
+    if (testBtn) {
+        testBtn.addEventListener("click", function() {
+            if (!getSpeechRecognition()) {
+                statusEl.textContent =
+                    "⚠️ التعرف على الصوت غير مدعوم في هذا المتصفح. استخدم Chrome أو Safari.";
+                return;
+            }
+
+            if (testModeActive) {
+                exitTestMode();
+            } else {
+                enterTestMode();
+            }
+        });
+    }
+})();
+
+/* تنظيف عند مغادرة الصفحة */
+window.addEventListener("pagehide", () => {
+    stopCurrentSound();
+});
+
+/* منع التكبير بالنقر المزدوج على iOS */
+let lastTouchEnd = 0;
+document.addEventListener("touchend", (e) => {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) e.preventDefault();
+    lastTouchEnd = now;
+}, { passive: false });
+</script>
+
+</body>
+</html>
